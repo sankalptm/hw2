@@ -16,15 +16,13 @@ MyDataStore::MyDataStore(){
 }
 MyDataStore::~MyDataStore(){
   map<std::string, User*>::iterator user_delete;
-  map<std::string, std::vector<Product*>>::iterator cart_delete;
+  //vector<Product*>>::iterator product_delete;
   //map<std::string, std::set<Product*>::iterator key_delete;
   for (user_delete=customer.begin(); user_delete!= customer.end(); user_delete++){
     delete user_delete->second;
   }
-  for (cart_delete=cart.begin(); cart_delete!= cart.end(); cart_delete++){
-    for (Product* i : cart_delete->second){
-        delete i;
-    }
+  for (size_t i=0; i < collection.size();i++){
+    delete collection[i];
   }
   /*for (key_delete=key.begin(); key_delete!=key.end(); key_delete++){
     for (Product*i : key_delete->second){
@@ -52,14 +50,20 @@ void MyDataStore:: addProduct(Product* p){
     }*/
 
     for (it=terms.begin(); it!= terms.end(); it++){
-      map<string, set<Product*>>::iterator key_it= key.find(*it);
+      string temp;
+      temp=convToLower(*it);
+      map<string, set<Product*>>::iterator key_it= key.find(temp);
+     
       if (key_it!=key.end()){
-        key[*it].insert(p);
+        //cout<<"Added "<<*it<<endl;
+        
+        key[temp].insert(p);
       }
       else {
+        //cout<<"Added "<<*it<<endl;
         set<Product*> new_set;
         new_set.insert(p);
-        key.insert(make_pair(*it,new_set));
+        key[temp] = new_set;
       }
 
     }
@@ -84,7 +88,7 @@ std::vector<Product*> MyDataStore:: search(std::vector<std::string>& terms, int 
   // you need to build a vector of products 
   //continue to setUnion or setIntersect until 
   set<Product*> combined;
-  if (type==0){
+  if (type==1){
     
     for (size_t i=0; i < terms.size(); i++){
       if (key.find(terms[i])!=key.end()){
@@ -95,10 +99,16 @@ std::vector<Product*> MyDataStore:: search(std::vector<std::string>& terms, int 
     }
     
   }
-  else if (type==1) {
+  else if (type==0) {
     //set <Product*> combined;
-    for (size_t i=0; i < terms.size(); i++){
+    if (key.find(terms[0])!=key.end()){
+      combined=(key[terms[0]]);
+    }
+    
+    for (size_t i=1; i < terms.size(); i++){
+      //cout<<"Found"<<terms[i]<<endl;
       if (key.find(terms[i])!=key.end()){
+        //cout<<"Found"<<terms[i]<<endl;
         //map<string, set<Product*>>::iterator it =key.find(terms[i]);
         //access the specific value of the map 
         combined =setIntersection(combined, key[terms[i]]);
@@ -147,13 +157,13 @@ void MyDataStore:: dump(std::ostream& ofile){
   for (size_t i=0; i< collection.size(); i++){
     collection[i]->dump(ofile);
   }
-  ofile<<"<products>"<<"\n"<<"<users>"<<"\n";
+  ofile<<"</products>"<<"\n"<<"<users>"<<"\n";
   for (map<string, User*>::iterator it =customer.begin(); it!=customer.end();it++){
     if (it->second!=NULL){
       (*it).second->dump(ofile);
     }
   }
-  ofile<<"<users>"<<"\n";
+  ofile<<"</users>"<<"\n";
 }
 void MyDataStore::BuyCart(string username){
   map<string, vector<Product*>>::iterator it = cart.find(username);

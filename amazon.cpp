@@ -80,6 +80,7 @@ int main(int argc, char* argv[])
                     terms.push_back(term);
                 }
                 hits = ds.search(terms, 0);
+                cout<<hits.size()<<endl;
                 displayProducts(hits);
             }
             else if ( cmd == "OR" ) {

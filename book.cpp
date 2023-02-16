@@ -21,6 +21,7 @@ std::set<std::string> Book:: keywords() const {
   std::set<std::string> title= parseStringToWords(name_);
   std::set<std::string> authors=parseStringToWords(author_);
   std::set<std::string> combined=setUnion(title, authors);
+  combined.insert(ISBN_);
   return combined;
   
 }
